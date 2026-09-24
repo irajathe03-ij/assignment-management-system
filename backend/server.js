@@ -10,14 +10,22 @@ const submissionRoutes = require("./routes/submissionRoutes");
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// Allow requests from frontend
+app.use(
+    cors({
+        origin: "*",
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"]
+    })
+);
+
 app.use(express.json());
 
-// Test route
+// Root route
 app.get("/", (req, res) => {
     res.json({
-        message: "Assignment Management System API is running"
+        message:
+            "Assignment Management System API is running"
     });
 });
 
@@ -56,9 +64,9 @@ async function startServer() {
     try {
         await testConnection();
 
-        app.listen(PORT, () => {
+        app.listen(PORT, "0.0.0.0", () => {
             console.log(
-                `Server running on http://localhost:${PORT}`
+                `Server running on port ${PORT}`
             );
         });
 
@@ -67,6 +75,8 @@ async function startServer() {
             "Failed to start server:",
             error.message
         );
+
+        process.exit(1);
     }
 }
 
