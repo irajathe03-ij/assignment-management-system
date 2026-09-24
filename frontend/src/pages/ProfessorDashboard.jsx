@@ -13,12 +13,8 @@ function ProfessorDashboard() {
 
     const loadAssignments = async () => {
         try {
-            setLoading(true);
-
             const response = await api.get("/assignments");
-
             setAssignments(response.data);
-            setError("");
         } catch (error) {
             setError(
                 error.response?.data?.message ||
@@ -38,15 +34,10 @@ function ProfessorDashboard() {
             "Are you sure you want to delete this assignment?"
         );
 
-        if (!confirmed) {
-            return;
-        }
+        if (!confirmed) return;
 
         try {
             await api.delete(`/assignments/${id}`);
-
-            alert("Assignment deleted successfully!");
-
             loadAssignments();
         } catch (error) {
             alert(
@@ -59,15 +50,18 @@ function ProfessorDashboard() {
     const logout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-
         navigate("/login");
     };
+
+    const upcomingCount = assignments.filter(
+        (assignment) =>
+            new Date(assignment.deadline) > new Date()
+    ).length;
 
     return (
         <div className="dashboard">
 
             <nav className="navbar navbar-expand-lg navbar-custom">
-
                 <div className="container">
 
                     <span className="navbar-brand fw-bold">
@@ -90,23 +84,20 @@ function ProfessorDashboard() {
                     </div>
 
                 </div>
-
             </nav>
 
             <div className="container py-5">
 
+                {/* Header */}
+
                 <div className="d-flex justify-content-between align-items-center mb-4">
 
                     <div>
-
-                        <h2>
-                            Professor Dashboard
-                        </h2>
+                        <h2>Professor Dashboard</h2>
 
                         <p className="text-muted mb-0">
-                            Create and manage assignments
+                            Manage and track your assignments
                         </p>
-
                     </div>
 
                     <Link
@@ -118,38 +109,73 @@ function ProfessorDashboard() {
 
                 </div>
 
+                {/* Summary */}
+
+                <div className="row g-3 mb-4">
+
+                    <div className="col-md-6">
+
+                        <div className="card border-0 shadow-sm">
+
+                            <div className="card-body">
+
+                                <p className="text-muted mb-1">
+                                    Total Assignments
+                                </p>
+
+                                <h3 className="fw-bold mb-0">
+                                    {assignments.length}
+                                </h3>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div className="col-md-6">
+
+                        <div className="card border-0 shadow-sm">
+
+                            <div className="card-body">
+
+                                <p className="text-muted mb-1">
+                                    Upcoming
+                                </p>
+
+                                <h3 className="fw-bold mb-0">
+                                    {upcomingCount}
+                                </h3>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {/* Error */}
+
                 {error && (
                     <div className="alert alert-danger">
                         {error}
                     </div>
                 )}
 
+                {/* Loading */}
+
                 {loading ? (
 
                     <div className="text-center py-5">
-
-                        <div
-                            className="spinner-border text-primary"
-                            role="status"
-                        >
-                            <span className="visually-hidden">
-                                Loading...
-                            </span>
-                        </div>
-
-                        <p className="mt-3 text-muted">
-                            Loading assignments...
-                        </p>
-
+                        Loading assignments...
                     </div>
 
                 ) : assignments.length === 0 ? (
 
                     <div className="card p-5 text-center shadow-sm">
 
-                        <h4>
-                            No assignments yet
-                        </h4>
+                        <h4>No assignments yet</h4>
 
                         <p className="text-muted">
                             Create your first assignment to get started.
@@ -166,80 +192,82 @@ function ProfessorDashboard() {
 
                 ) : (
 
-                    <div className="row g-4">
+                    <>
 
-                        {assignments.map((assignment) => (
+                        <h4 className="mb-3">
+                            Your Assignments
+                        </h4>
 
-                            <div
-                                className="col-md-6 col-lg-4"
-                                key={assignment.id}
-                            >
+                        <div className="row g-4">
 
-                                <div className="card assignment-card h-100">
+                            {assignments.map((assignment) => (
 
-                                    <div className="card-body">
+                                <div
+                                    className="col-md-6 col-lg-4"
+                                    key={assignment.id}
+                                >
 
-                                        <span className="badge bg-primary mb-2">
-                                            {assignment.subject}
-                                        </span>
+                                    <div className="card assignment-card h-100">
 
-                                        <h5 className="card-title">
-                                            {assignment.title}
-                                        </h5>
+                                        <div className="card-body">
 
-                                        <p className="card-text text-muted">
-                                            {assignment.description ||
-                                                "No description provided."}
-                                        </p>
+                                            <span className="badge bg-primary mb-2">
+                                                {assignment.subject}
+                                            </span>
 
-                                        <p className="mb-1">
-                                            <strong>
-                                                Deadline:
-                                            </strong>
-                                        </p>
+                                            <h5 className="card-title">
+                                                {assignment.title}
+                                            </h5>
 
-                                        <p className="text-danger">
-                                            {new Date(
-                                                assignment.deadline
-                                            ).toLocaleString()}
-                                        </p>
+                                            <p className="card-text text-muted">
+                                                {assignment.description ||
+                                                    "No description provided."}
+                                            </p>
 
-                                    </div>
+                                            <p className="mb-1">
+                                                <strong>
+                                                    Deadline:
+                                                </strong>
+                                            </p>
 
-                                    <div className="card-footer bg-white border-0 pb-3">
+                                            <p className="text-danger mb-0">
+                                                {new Date(
+                                                    assignment.deadline
+                                                ).toLocaleString()}
+                                            </p>
 
-                                        <div className="d-flex gap-2 flex-wrap">
+                                        </div>
 
-                                            {/* EDIT */}
+                                        <div className="card-footer bg-white border-0 pb-3">
 
-                                            <Link
-                                                to={`/professor/edit/${assignment.id}`}
-                                                className="btn btn-outline-primary btn-sm"
-                                            >
-                                                Edit
-                                            </Link>
+                                            <div className="d-flex gap-2 flex-wrap">
 
-                                            {/* VIEW SUBMISSIONS */}
+                                                <Link
+                                                    to={`/professor/edit/${assignment.id}`}
+                                                    className="btn btn-outline-primary btn-sm"
+                                                >
+                                                    Edit
+                                                </Link>
 
-                                            <Link
-                                                to={`/professor/submissions/${assignment.id}`}
-                                                className="btn btn-outline-success btn-sm"
-                                            >
-                                                View Submissions
-                                            </Link>
+                                                <Link
+                                                    to={`/professor/submissions/${assignment.id}`}
+                                                    className="btn btn-outline-success btn-sm"
+                                                >
+                                                    View Submissions
+                                                </Link>
 
-                                            {/* DELETE */}
+                                                <button
+                                                    className="btn btn-outline-danger btn-sm"
+                                                    onClick={() =>
+                                                        handleDelete(
+                                                            assignment.id
+                                                        )
+                                                    }
+                                                >
+                                                    Delete
+                                                </button>
 
-                                            <button
-                                                className="btn btn-outline-danger btn-sm"
-                                                onClick={() =>
-                                                    handleDelete(
-                                                        assignment.id
-                                                    )
-                                                }
-                                            >
-                                                Delete
-                                            </button>
+                                            </div>
 
                                         </div>
 
@@ -247,11 +275,11 @@ function ProfessorDashboard() {
 
                                 </div>
 
-                            </div>
+                            ))}
 
-                        ))}
+                        </div>
 
-                    </div>
+                    </>
 
                 )}
 
